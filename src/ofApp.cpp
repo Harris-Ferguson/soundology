@@ -174,6 +174,57 @@ ofMesh createOctahedronMesh(float size) {
     return mesh;
 }
 
+ofMesh createTorusKnotMesh(float radius, float tubeRadius, int radialSegments, int tubularSegments, float p = 2, float q = 3) {
+    ofMesh mesh;
+    mesh.setMode(OF_PRIMITIVE_TRIANGLES);
+
+    for (int i = 0; i <= tubularSegments; ++i) {
+        float u = i / float(tubularSegments) * TWO_PI * p;
+        float cu = cos(u);
+        float su = sin(u);
+        float quOverP = q / p * u;
+        float cs = cos(quOverP);
+
+        for (int j = 0; j <= radialSegments; ++j) {
+            float v = j / float(radialSegments) * TWO_PI;
+            float cv = cos(v);
+            float sv = sin(v);
+
+            float x = (radius + tubeRadius * cv) * cu;
+            float y = (radius + tubeRadius * cv) * su;
+            float z = tubeRadius * sv;
+
+            ofVec3f vertex(x, y, z);
+            mesh.addVertex(vertex);
+
+            // Calculate normals
+            ofVec3f normal = vertex.normalized();
+            mesh.addNormal(normal);
+        }
+    }
+
+    for (int i = 0; i < tubularSegments; ++i) {
+        for (int j = 0; j < radialSegments; ++j) {
+            int a = i * (radialSegments + 1) + j;
+            int b = (i + 1) * (radialSegments + 1) + j;
+            int c = (i + 1) * (radialSegments + 1) + (j + 1);
+            int d = i * (radialSegments + 1) + (j + 1);
+
+            // Add two triangles for each segment
+            mesh.addIndex(a);
+            mesh.addIndex(b);
+            mesh.addIndex(d);
+
+            mesh.addIndex(b);
+            mesh.addIndex(c);
+            mesh.addIndex(d);
+        }
+    }
+
+    return mesh;
+}
+
+
 void ofApp::generateGeometries() {
     // Rocks
     addGeom(make_shared<BaseShape>(createTetrahedronMesh(10)), ofVec3f(0, 0, 0), ofVec3f(40, 0, 0), ofVec3f(1, 1, 1));
@@ -212,12 +263,66 @@ void ofApp::generateGeometries() {
 	addGeom(make_shared<Minerals>(createCylinderMesh(3, 10, 20, 3, 1)), ofVec3f(1,0,PI/2), ofVec3f(40,0,0), ofVec3f(1,1,1));
 	addGeom(make_shared<Minerals>(createCylinderMesh(3, 10, 20, 3, 1)), ofVec3f(0,1,0), ofVec3f(50,0,0), ofVec3f(1,1,1));
 
+	// Mineral Lines
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,0,0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,0,-PI/2), ofVec3f(20,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,0,PI/2), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,0,0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,PI/2,-PI/2), ofVec3f(20,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,-PI/2,PI/2), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(PI/2,PI/4,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+
 	// Spikes 
 	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 60, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(0,0,-30), ofVec3f(1.5, 0.7, 1));
 	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 60, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(0,0,-30), ofVec3f(1,1,1));
 	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 60, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(20,20,0), ofVec3f(1,1,1));
 	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 70, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
 	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 80, 4, 10)), ofVec3f(0, -PI/2, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
+
+	// Long Lines
+	addGeom(make_shared<TentacleStraight>(), ofVec3f(0,0,0), ofVec3f(0,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<TentacleStraight>(), ofVec3f(0,-PI/2,0), ofVec3f(0,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<TentacleStraight>(), ofVec3f(0,PI/2,0), ofVec3f(0,0,0), ofVec3f(1,1,1));
+
+	// Pretzels 
+	addGeom(make_shared<BaseShape>(createTorusKnotMesh(15, 3, 3, 13)), ofVec3f(0, PI/2, 0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusKnotMesh(15, 3, 3, 10)), ofVec3f(0, 0, 0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusKnotMesh(15, 3, 3, 6)), ofVec3f(0, 0, 0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusKnotMesh(15, 3, 3, 13)), ofVec3f(0, 0, 0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+
+	// Cinder Blocks
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 7, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 7, 40, 4, 10)), ofVec3f(0, 0, PI/2), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(3, 10, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 6, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 10, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,-40,30), ofVec3f(1,1,1));
+
+	// Pettles
+	addGeom(make_shared<Pettle>(), ofVec3f(0,0,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Pettle>(), ofVec3f(0,PI/2,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Pettle>(), ofVec3f(0,-PI/2,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCircleMesh(20, 30)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCircleMesh(20, 30)), ofVec3f(0,0,0), ofVec3f(0,-30,0), ofVec3f(1,1,1));
+
+	// Triangles
+	addGeom(make_shared<BaseShape>(createTetrahedronMesh(6)), ofVec3f(0,0,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTetrahedronMesh(6)), ofVec3f(-PI/2,0,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTetrahedronMesh(6)), ofVec3f(0,PI/2,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTetrahedronMesh(6)), ofVec3f(0,-PI/2,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+
+	// Squares ?? 
+	addGeom(make_shared<BaseShape>(createCylinderMesh(5, 5, 7, 4, 1)), ofVec3f(0,0,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(5, 5, 7, 4, 1)), ofVec3f(-PI/2,0,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(5, 5, 7, 4, 1)), ofVec3f(0,PI/2,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(5, 5, 7, 4, 1)), ofVec3f(0,-PI/2,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
+
+	// Bubbles
+	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(0, 0, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
+	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(-PI / 2, 0, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
+	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(0, PI / 2, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
+	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(0, -PI / 2, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
+
 }
 
 

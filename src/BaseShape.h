@@ -21,11 +21,11 @@ public:
 
     virtual void draw() {
         ofMatrix4x4 transformMatrix;
-        transformMatrix.translate(position);
+        transformMatrix.scale(scale);
         transformMatrix.rotate(ofRadToDeg(rotation.x), 1, 0, 0);
         transformMatrix.rotate(ofRadToDeg(rotation.y), 0, 1, 0);
         transformMatrix.rotate(ofRadToDeg(rotation.z), 0, 0, 1);
-        transformMatrix.scale(scale);
+        transformMatrix.translate(position*2);
         ofPushMatrix();
         ofMultMatrix(transformMatrix);
 

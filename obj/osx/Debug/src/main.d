@@ -392,7 +392,8 @@ obj/osx/Debug/src/main.o: \
   /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Minerals.h \
   /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Tentacle.h \
   /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Antenna.h \
-  /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Leg.h
+  /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Leg.h \
+  /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/TentacleStraight.h
 
 ../../../libs/openFrameworks/ofMain.h:
 
@@ -1179,3 +1180,5 @@ obj/osx/Debug/src/main.o: \
 /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Antenna.h:
 
 /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Leg.h:
+
+/Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/TentacleStraight.h:

@@ -6,6 +6,7 @@
 #include "Tentacle.h"
 #include "Antenna.h"
 #include "Leg.h"
+#include "TentacleStraight.h"
 #include <memory>
 #include <vector>
 
