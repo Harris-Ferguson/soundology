@@ -9,24 +9,28 @@ ofMesh createCylinderMesh(float radiusTop, float radiusBottom, float height, int
     float halfHeight = height / 2.0f;
     float angleStep = TWO_PI / radialSegments;
 
-    // Create vertices and normals
     for (int y = 0; y <= heightSegments; ++y) {
         float v = float(y) / heightSegments;
         float currentHeight = height * v - halfHeight;
-        float radius = ofLerp(radiusBottom, radiusTop, v);  // Linearly interpolate between bottom and top radius
+        float radius = ofLerp(radiusBottom, radiusTop, v);
 
         for (int i = 0; i <= radialSegments; ++i) {
             float angle = i * angleStep;
-            float x = radius * cos(angle);
-            float z = radius * sin(angle);
+            glm::vec3 vertex(radius * cos(angle), currentHeight, radius * sin(angle));
 
-            mesh.addVertex(ofVec3f(x, currentHeight, z));
-            mesh.addNormal(ofVec3f(x, 0, z).normalize());
-            mesh.addTexCoord(ofVec2f(float(i) / radialSegments, v));
+            // Add vertex
+            mesh.addVertex(vertex);
+
+            // Calculate and add normal
+            glm::vec3 normal = glm::normalize(glm::vec3(cos(angle), 0, sin(angle)));
+            mesh.addNormal(normal);
+
+            // Texture coordinates
+            mesh.addTexCoord(glm::vec2(float(i) / radialSegments, v));
         }
     }
 
-    // Create faces
+    // Create faces with proper winding order
     for (int y = 0; y < heightSegments; ++y) {
         for (int i = 0; i < radialSegments; ++i) {
             int current = y * (radialSegments + 1) + i;
@@ -46,39 +50,41 @@ ofMesh createCylinderMesh(float radiusTop, float radiusBottom, float height, int
 }
 
 
+
 ofMesh createTorusMesh(float majorRadius, float minorRadius, int majorSegments, int minorSegments) {
     ofMesh mesh;
     mesh.setMode(OF_PRIMITIVE_TRIANGLES);
 
-    for (int i = 0; i < majorSegments; ++i) {
+    for (int i = 0; i <= majorSegments; ++i) {
         float theta = ofMap(i, 0, majorSegments, 0, TWO_PI);
-        ofVec3f majorCenter(cos(theta) * majorRadius, sin(theta) * majorRadius, 0);
+        glm::vec3 majorCenter(cos(theta) * majorRadius, sin(theta) * majorRadius, 0);
 
-        for (int j = 0; j < minorSegments; ++j) {
+        for (int j = 0; j <= minorSegments; ++j) {
             float phi = ofMap(j, 0, minorSegments, 0, TWO_PI);
-            ofVec3f minorPoint = majorCenter + ofVec3f(cos(theta) * (majorRadius + minorRadius * cos(phi)), sin(theta) * (majorRadius + minorRadius * cos(phi)), minorRadius * sin(phi));
-            ofVec3f normal = (minorPoint - majorCenter).normalize();
+            glm::vec3 minorPoint = majorCenter + glm::vec3(cos(theta) * (majorRadius + minorRadius * cos(phi)), 
+                                                           sin(theta) * (majorRadius + minorRadius * cos(phi)), 
+                                                           minorRadius * sin(phi));
+            glm::vec3 normal = glm::normalize(minorPoint - majorCenter);
 
             mesh.addVertex(minorPoint);
             mesh.addNormal(normal);
-            mesh.addTexCoord(ofVec2f(float(i) / majorSegments, float(j) / minorSegments));
+            mesh.addTexCoord(glm::vec2(float(i) / majorSegments, float(j) / minorSegments));
         }
     }
 
+    // Create faces with proper winding order
     for (int i = 0; i < majorSegments; ++i) {
         for (int j = 0; j < minorSegments; ++j) {
-            int current = i * minorSegments + j;
-            int next = ((i + 1) % majorSegments) * minorSegments + j;
-            int currentNext = current + 1;
-            int nextNext = next + 1;
+            int current = i * (minorSegments + 1) + j;
+            int next = (i + 1) * (minorSegments + 1) + j;
 
             mesh.addIndex(current);
-            mesh.addIndex(nextNext % (majorSegments * minorSegments));
             mesh.addIndex(next);
+            mesh.addIndex(current + 1);
 
-            mesh.addIndex(current);
-            mesh.addIndex(currentNext % (majorSegments * minorSegments));
-            mesh.addIndex(nextNext % (majorSegments * minorSegments));
+            mesh.addIndex(next);
+            mesh.addIndex(next + 1);
+            mesh.addIndex(current + 1);
         }
     }
 
@@ -106,33 +112,35 @@ ofMesh createCircleMesh(float radius, int resolution) {
 
 ofMesh createTetrahedronMesh(float size) {
     ofMesh mesh;
+    mesh.setMode(OF_PRIMITIVE_TRIANGLES);
 
     // Define vertices
-    ofVec3f v0(1, 1, 1);
-    ofVec3f v1(-1, -1, 1);
-    ofVec3f v2(-1, 1, -1);
-    ofVec3f v3(1, -1, -1);
+    glm::vec3 v0 = glm::normalize(glm::vec3(1, 1, 1)) * size;
+    glm::vec3 v1 = glm::normalize(glm::vec3(-1, -1, 1)) * size;
+    glm::vec3 v2 = glm::normalize(glm::vec3(-1, 1, -1)) * size;
+    glm::vec3 v3 = glm::normalize(glm::vec3(1, -1, -1)) * size;
 
-    // Scale vertices
-    v0 *= size;
-    v1 *= size;
-    v2 *= size;
-    v3 *= size;
-
-    // Add vertices
+    // Add vertices and corresponding normals
     mesh.addVertex(v0);
     mesh.addVertex(v1);
     mesh.addVertex(v2);
     mesh.addVertex(v3);
 
-    // Define faces (each face is a triangle)
+    // Define faces (with proper winding order)
     mesh.addIndex(0); mesh.addIndex(1); mesh.addIndex(2);
     mesh.addIndex(0); mesh.addIndex(2); mesh.addIndex(3);
     mesh.addIndex(0); mesh.addIndex(3); mesh.addIndex(1);
     mesh.addIndex(1); mesh.addIndex(3); mesh.addIndex(2);
 
+    // Calculate and add normals
+    mesh.addNormal(glm::normalize(glm::cross(v1 - v0, v2 - v0)));
+    mesh.addNormal(glm::normalize(glm::cross(v2 - v0, v3 - v0)));
+    mesh.addNormal(glm::normalize(glm::cross(v3 - v0, v1 - v0)));
+    mesh.addNormal(glm::normalize(glm::cross(v2 - v1, v3 - v1)));
+
     return mesh;
 }
+
 
 ofMesh createOctahedronMesh(float size) {
     ofMesh mesh;
@@ -326,7 +334,7 @@ void ofApp::generateGeometries() {
 }
 
 void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type) {
-	std::vector<ofColor> colors = {
+    std::vector<ofColor> colors = {
         ofColor::red, ofColor::green, ofColor::blue, 
         ofColor::yellow, ofColor::magenta, ofColor::cyan, 
         ofColor::orange, ofColor::purple, ofColor::pink
@@ -345,19 +353,23 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
     for (int k = 0; k < fileScale * 4; ++k) {
         // Copy the precomputed mesh
         ofMesh submesh = pregeom;
+        ofMesh mirroredSubmesh = pregeom;
 
-		ofColor randomColor = colors[ofRandom(0, colors.size())];
+        ofColor randomColor = colors[static_cast<int>(ofRandom(0, colors.size()))];
 
-		for (int i = 0; i < submesh.getNumVertices(); ++i) {
+        for (int i = 0; i < submesh.getNumVertices(); ++i) {
             submesh.addColor(randomColor);
+            mirroredSubmesh.addColor(randomColor);
         }
 
         // Create transformation matrix
         ofMatrix4x4 transformMatrix;
+        ofMatrix4x4 mirroredTransformMatrix;
 
         // Apply scaling
         float scaleValue = fileScale * 4;
         transformMatrix.scale(scaleValue, scaleValue, scaleValue);
+        mirroredTransformMatrix.scale(scaleValue, scaleValue, scaleValue);
 
         // Apply rotation
         float randoms[3] = {
@@ -369,6 +381,10 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
         transformMatrix.rotate(randoms[0] * 7.0f, 1, 0, 0);
         transformMatrix.rotate(randoms[1] * 7.0f, 0, 1, 0);
         transformMatrix.rotate(randoms[2] * 7.0f, 0, 0, 1);
+
+        mirroredTransformMatrix.rotate(-randoms[0] * 7.0f, 1, 0, 0);  // Mirrored rotation
+        mirroredTransformMatrix.rotate(-randoms[1] * 7.0f, 0, 1, 0);
+        mirroredTransformMatrix.rotate(-randoms[2] * 7.0f, 0, 0, 1);
 
         // Apply translation
         float randoms2[3] = {
@@ -383,25 +399,36 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
             (randoms2[2] - 0.5f) * 100.0f * fileScale
         );
 
-        // Manually apply the transformation to each vertex of the submesh
+        mirroredTransformMatrix.translate(
+            -(randoms2[1] - 0.5f) * 100.0f * fileScale,  // Mirrored translation on x-axis
+            (randoms2[0] - 0.5f) * 100.0f * fileScale,
+            (randoms2[2] - 0.5f) * 100.0f * fileScale
+        );
+
+        // Apply transformations to submesh
         for (int i = 0; i < submesh.getNumVertices(); ++i) {
             ofVec3f vertex = submesh.getVertex(i);
+            ofVec3f mirroredVertex = mirroredSubmesh.getVertex(i);
 
             // Apply translation
-            vertex = vertex + ofVec3f(transformMatrix.getTranslation());
+            vertex += ofVec3f(transformMatrix.getTranslation());
+            mirroredVertex += ofVec3f(mirroredTransformMatrix.getTranslation());
 
-            // Apply rotation
-            ofVec3f rotatedVertex = vertex * transformMatrix.getRotate();
-
-            // Apply scaling
+            // Apply rotation and scaling
+            ofVec3f rotatedVertex = transformMatrix.getRotate() * vertex;
             ofVec3f scaledVertex = rotatedVertex * scaleValue;
+
+            ofVec3f mirroredRotatedVertex = mirroredTransformMatrix.getRotate() * mirroredVertex;
+            ofVec3f mirroredScaledVertex = mirroredRotatedVertex * scaleValue;
 
             // Set the transformed vertex
             submesh.setVertex(i, scaledVertex);
+            mirroredSubmesh.setVertex(i, mirroredScaledVertex);
         }
 
         // Merge the transformed submesh into the main geometry
         geometry.append(submesh);
+        geometry.append(mirroredSubmesh);
     }
 }
 
@@ -432,15 +459,11 @@ void ofApp::setup() {
     ofMesh complexGeometry;
 
     // Example with different precomputed geometries
-    createPregeom(complexGeometry, 100000, precomputedGeometries[getRandomShapeIndex()]->mesh, 0);
-    createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 1);
-    createPregeom(complexGeometry, 200000, precomputedGeometries[getRandomShapeIndex()]->mesh, 2);
-	createPregeom(complexGeometry, 20000, precomputedGeometries[getRandomShapeIndex()]->mesh, 3);
+    createPregeom(complexGeometry, 76219, precomputedGeometries[getRandomShapeIndex()]->mesh, 0);
+    createPregeom(complexGeometry, 54934, precomputedGeometries[getRandomShapeIndex()]->mesh, 1);
+    createPregeom(complexGeometry, 1054600, precomputedGeometries[getRandomShapeIndex()]->mesh, 2);
+	createPregeom(complexGeometry, 3945123, precomputedGeometries[getRandomShapeIndex()]->mesh, 3);
     createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 4);
-    createPregeom(complexGeometry, 2000, precomputedGeometries[getRandomShapeIndex()]->mesh, 5);
-	createPregeom(complexGeometry, 1000, precomputedGeometries[getRandomShapeIndex()]->mesh, 0);
-    createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 1);
-    createPregeom(complexGeometry, 10000, precomputedGeometries[getRandomShapeIndex()]->mesh, 2);
 
     // Store or use complexGeometry for rendering
     shapeToRender = make_shared<BaseShape>(complexGeometry);
