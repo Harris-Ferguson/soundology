@@ -20,16 +20,14 @@ public:
     virtual void update() {}
 
     virtual void draw() {
+        ofMatrix4x4 transformMatrix;
+        transformMatrix.translate(position);
+        transformMatrix.rotate(ofRadToDeg(rotation.x), 1, 0, 0);
+        transformMatrix.rotate(ofRadToDeg(rotation.y), 0, 1, 0);
+        transformMatrix.rotate(ofRadToDeg(rotation.z), 0, 0, 1);
+        transformMatrix.scale(scale);
         ofPushMatrix();
-        ofTranslate(position);
-        float rotX = ofRadToDeg(rotation.x);
-        float rotY = ofRadToDeg(rotation.y);
-        float rotZ = ofRadToDeg(rotation.z);
-
-        ofRotateZDeg(rotZ);
-        ofRotateYDeg(rotY);
-        ofRotateXDeg(rotX);
-        ofScale(scale.x, scale.y, scale.z);
+        ofMultMatrix(transformMatrix);
 
         material.begin();
         mesh.draw();
