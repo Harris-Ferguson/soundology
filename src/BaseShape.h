@@ -22,9 +22,13 @@ public:
     virtual void draw() {
         ofPushMatrix();
         ofTranslate(position);
-        ofRotateXDeg(rotation.x);
-        ofRotateYDeg(rotation.y);
-        ofRotateZDeg(rotation.z);
+        float rotX = ofRadToDeg(rotation.x);
+        float rotY = ofRadToDeg(rotation.y);
+        float rotZ = ofRadToDeg(rotation.z);
+
+        ofRotateZDeg(rotZ);
+        ofRotateYDeg(rotY);
+        ofRotateXDeg(rotX);
         ofScale(scale.x, scale.y, scale.z);
 
         material.begin();
@@ -39,5 +43,17 @@ public:
         material.setAmbientColor(color * 0.5);  // Set ambient color to half the diffuse color
         material.setSpecularColor(ofColor(255, 255, 255)); // Set a default white specular highlight
         material.setShininess(128); // Set shininess for the material
+    }
+
+    void applyScale(const ofVec3f& scaleVec) {
+        scale = scaleVec;
+    }
+
+    void applyRotation(const ofVec3f& rotationVec) {
+        rotation = rotationVec;
+    }
+
+    void applyTranslation(const ofVec3f& translationVec) {
+        position = translationVec;
     }
 };

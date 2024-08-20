@@ -31,18 +31,11 @@ class ofApp : public ofBaseApp{
 		void audioIn(ofSoundBuffer & input);
 
 		void generateGeometries();
-		void addGeom(std::shared_ptr<BaseShape> geom, ofVec3f rotation, ofVec3f translation, ofVec3f scale);
+		void addGeom(shared_ptr<BaseShape> geom, const ofVec3f& rotation, const ofVec3f& translation, const ofVec3f& scale);
 
 		// Container for all shapes
     	std::vector<std::shared_ptr<BaseShape>> shapes;
 
 		ofLight pointLight;
 		ofEasyCam cam;
-
-		// BUGS STUFF
-		Pettle* pettle;
-    	Tentacle* tentacle;
-    	Antenna* antenna;
-		Minerals* minerals;
-		Leg* leg;
 };

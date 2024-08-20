@@ -89,6 +89,32 @@ ofMesh createOctahedronMesh(float size) {
     return mesh;
 }
 
+void ofApp::generateGeometries() {
+    // Rocks
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(10)), ofVec3f(0, 0, 0), ofVec3f(40, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(20)), ofVec3f(0, 0, 0), ofVec3f(20, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(20)), ofVec3f(0, 0, 0), ofVec3f(0, -40, 0), ofVec3f(1, 1, 1));
+
+    // Legs
+    addGeom(make_shared<Leg>(4, 3), ofVec3f(1, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(4, 6), ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(5, 3), ofVec3f(0, 0, PI / 2), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(6, 4), ofVec3f(0, -(PI / 2), 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(7, 3), ofVec3f(0, PI / 2, PI / 2), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(8, 5), ofVec3f(0, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(9, 2), ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(10, 6), ofVec3f(0, 0, PI / 2), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(11, 3), ofVec3f(1, -(PI / 2), 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+}
+
+
+void ofApp::addGeom(shared_ptr<BaseShape> geom, const ofVec3f& rotation, const ofVec3f& translation, const ofVec3f& scale) {
+    geom->applyScale(scale);
+    geom->applyRotation(rotation);
+    geom->applyTranslation(translation);
+    shapes.push_back(geom);
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofBackground(0);
@@ -98,25 +124,6 @@ void ofApp::setup(){
     pointLight.enable();
 
 	ofEnableDepthTest();
-
-	ofMesh boxMesh = ofMesh::box(2, 2, 2, 1, 1, 1);
-	pettle = new Pettle();
-	tentacle = new Tentacle(2);
-	antenna = new Antenna(8);
-	minerals = new Minerals(boxMesh);
-	leg = new Leg(3, 4);
-
-	pettle->position.set(0, 0, 0);
-    minerals->position.set(0, 0, 0);
-    tentacle->position.set(0, 0, 0);
-    antenna->position.set(0, 0, 0);
-	leg->position.set(0, 0, 0);
-
-	pettle->setMaterialColor(ofColor::pink);
-	minerals->setMaterialColor(ofColor::red);
-	tentacle->setMaterialColor(ofColor::purple);
-	antenna->setMaterialColor(ofColor::blue);
-	leg->setMaterialColor(ofColor::lightBlue);
 
 	// Set up the camera
     cam.setNearClip(0.1);
@@ -129,6 +136,11 @@ void ofApp::setup(){
     pointLight.setPosition(ofGetWidth() / 2, ofGetHeight() / 2, 300);
     pointLight.setDiffuseColor(ofColor(255, 255, 255)); 
     pointLight.setSpecularColor(ofColor(255, 255, 255)); 
+
+	generateGeometries();
+	for (auto& shape : shapes) {
+        shape->setMaterialColor(ofColor::blue);
+    }
 }
 
 //--------------------------------------------------------------
@@ -139,11 +151,9 @@ void ofApp::update(){
 void ofApp::draw(){
     cam.begin();
 
-	pettle->draw();
-    minerals->draw();
-    tentacle->draw();
-    antenna->draw();
-	leg->draw();
+	for (auto& shape : shapes) {
+        shape->draw();
+    }
 
     cam.end();
 }
