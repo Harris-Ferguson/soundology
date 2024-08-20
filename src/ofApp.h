@@ -1,0 +1,48 @@
+#pragma once
+
+#include "ofMain.h"
+#include "Pettle.h"
+#include "Minerals.h"
+#include "Tentacle.h"
+#include "Antenna.h"
+#include "Leg.h"
+#include <memory>
+#include <vector>
+
+class ofApp : public ofBaseApp{
+	
+	public:
+		void setup();
+		void update();
+		void draw();
+		
+		void keyPressed(int key);
+		void keyReleased(int key);
+		void mouseMoved(int x, int y );
+		void mouseDragged(int x, int y, int button);
+		void mousePressed(int x, int y, int button);
+		void mouseReleased(int x, int y, int button);
+		void mouseEntered(int x, int y);
+		void mouseExited(int x, int y);
+		void windowResized(int w, int h);
+		void dragEvent(ofDragInfo dragInfo);
+		void gotMessage(ofMessage msg);
+				
+		void audioIn(ofSoundBuffer & input);
+
+		void generateGeometries();
+		void addGeom(std::shared_ptr<BaseShape> geom, ofVec3f rotation, ofVec3f translation, ofVec3f scale);
+
+		// Container for all shapes
+    	std::vector<std::shared_ptr<BaseShape>> shapes;
+
+		ofLight pointLight;
+		ofEasyCam cam;
+
+		// BUGS STUFF
+		Pettle* pettle;
+    	Tentacle* tentacle;
+    	Antenna* antenna;
+		Minerals* minerals;
+		Leg* leg;
+};
