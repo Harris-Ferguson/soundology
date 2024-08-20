@@ -29,18 +29,9 @@ public:
         ofPushMatrix();
         ofMultMatrix(transformMatrix);
 
-        material.begin();
         mesh.draw();
-        material.end();
 
         ofPopMatrix();
-    }
-
-    void setMaterialColor(ofColor color) {
-        material.setDiffuseColor(color);
-        material.setAmbientColor(color * 0.5);  // Set ambient color to half the diffuse color
-        material.setSpecularColor(ofColor(255, 255, 255)); // Set a default white specular highlight
-        material.setShininess(128); // Set shininess for the material
     }
 
     void applyScale(const ofVec3f& scaleVec) {

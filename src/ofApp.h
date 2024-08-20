@@ -34,9 +34,16 @@ class ofApp : public ofBaseApp{
 		void generateGeometries();
 		void addGeom(shared_ptr<BaseShape> geom, const ofVec3f& rotation, const ofVec3f& translation, const ofVec3f& scale);
 
-		// Container for all shapes
-    	std::vector<std::shared_ptr<BaseShape>> shapes;
+		int getRandomShapeIndex();
+
+		// Container for all precomputed shapes
+    	std::vector<std::shared_ptr<BaseShape>> precomputedGeometries;
+
+		// shape we are currently rendering
+		shared_ptr<BaseShape> shapeToRender;
 
 		ofLight pointLight;
 		ofEasyCam cam;
+
+
 };

@@ -240,7 +240,7 @@ void ofApp::generateGeometries() {
     addGeom(make_shared<Leg>(8, 5), ofVec3f(0, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
     addGeom(make_shared<Leg>(9, 2), ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
     addGeom(make_shared<Leg>(10, 6), ofVec3f(0, 0, PI / 2), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
-    addGeom(make_shared<Leg>(11, 3), ofVec3f(1, -(PI / 2), 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(11, 3), ofVec3f(0, -(PI / 2), 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
 
 	// Antennas
 	addGeom(make_shared<Antenna>(4), ofVec3f(0, -(PI/2), 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
@@ -271,7 +271,7 @@ void ofApp::generateGeometries() {
 	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,0,0), ofVec3f(0,20,0), ofVec3f(1,1,1));
 	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,PI/2,-PI/2), ofVec3f(20,0,0), ofVec3f(1,1,1));
 	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,-PI/2,PI/2), ofVec3f(30,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(PI/2,PI/4,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,PI/2,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
 
 	// Spikes 
 	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 60, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(0,0,-30), ofVec3f(1.5, 0.7, 1));
@@ -322,58 +322,145 @@ void ofApp::generateGeometries() {
 	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(-PI / 2, 0, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
 	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(0, PI / 2, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
 	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(0, -PI / 2, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
-
 }
+
+void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type) {
+	std::vector<ofColor> colors = {
+        ofColor::red, ofColor::green, ofColor::blue, 
+        ofColor::yellow, ofColor::magenta, ofColor::cyan, 
+        ofColor::orange, ofColor::purple, ofColor::pink
+    };
+
+    float fileScale = size / 300000.0f;
+    float fileScaleOrg = fileScale;
+
+    if (fileScale < 0.4f) {
+        fileScale = 0.4f;
+    }
+    if (fileScale > 1.0f) {
+        fileScale = 1.0f;
+    }
+
+    for (int k = 0; k < fileScale * 4; ++k) {
+        // Copy the precomputed mesh
+        ofMesh submesh = pregeom;
+
+		ofColor randomColor = colors[ofRandom(0, colors.size())];
+
+		for (int i = 0; i < submesh.getNumVertices(); ++i) {
+            submesh.addColor(randomColor);
+        }
+
+        // Create transformation matrix
+        ofMatrix4x4 transformMatrix;
+
+        // Apply scaling
+        float scaleValue = fileScale * 4;
+        transformMatrix.scale(scaleValue, scaleValue, scaleValue);
+
+        // Apply rotation
+        float randoms[3] = {
+            sin((-1 + k * 0.3f) * fileScaleOrg * 687.0f + 0.1f) / 2.0f + 0.5f,
+            sin((2 + k * 0.9f) * fileScaleOrg * 456.0f + 0.2f) / 2.0f + 0.5f,
+            sin((1 + k) * fileScaleOrg * 546.0f + 0.3f) / 2.0f + 0.5f
+        };
+
+        transformMatrix.rotate(randoms[0] * 7.0f, 1, 0, 0);
+        transformMatrix.rotate(randoms[1] * 7.0f, 0, 1, 0);
+        transformMatrix.rotate(randoms[2] * 7.0f, 0, 0, 1);
+
+        // Apply translation
+        float randoms2[3] = {
+            sin((2 + k) * fileScaleOrg * 413.0f + 0.1f) / 2.0f + 0.5f,
+            sin((2 + k) * fileScaleOrg * 543.0f + 0.2f) / 2.0f + 0.5f,
+            sin((2 + k) * fileScaleOrg * 123.0f + 0.3f) / 2.0f + 0.5f
+        };
+
+        transformMatrix.translate(
+            (randoms2[1] - 0.5f) * 100.0f * fileScale,
+            (randoms2[0] - 0.5f) * 100.0f * fileScale,
+            (randoms2[2] - 0.5f) * 100.0f * fileScale
+        );
+
+        // Manually apply the transformation to each vertex of the submesh
+        for (int i = 0; i < submesh.getNumVertices(); ++i) {
+            ofVec3f vertex = submesh.getVertex(i);
+
+            // Apply translation
+            vertex = vertex + ofVec3f(transformMatrix.getTranslation());
+
+            // Apply rotation
+            ofVec3f rotatedVertex = vertex * transformMatrix.getRotate();
+
+            // Apply scaling
+            ofVec3f scaledVertex = rotatedVertex * scaleValue;
+
+            // Set the transformed vertex
+            submesh.setVertex(i, scaledVertex);
+        }
+
+        // Merge the transformed submesh into the main geometry
+        geometry.append(submesh);
+    }
+}
+
 
 
 void ofApp::addGeom(shared_ptr<BaseShape> geom, const ofVec3f& rotation, const ofVec3f& translation, const ofVec3f& scale) {
     geom->applyScale(scale);
     geom->applyRotation(rotation);
     geom->applyTranslation(translation);
-    shapes.push_back(geom);
+    precomputedGeometries.push_back(geom);
+}
+
+int ofApp::getRandomShapeIndex() {
+    if (!precomputedGeometries.empty()) {
+        int randomIndex = ofRandom(0, precomputedGeometries.size()); // Generates a random float between 0 and shapes.size()
+        return static_cast<int>(randomIndex); // Casts the random float to an integer
+    } else {
+        return -1; // Return -1 if the shapes vector is empty
+    }
 }
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup() {
     ofBackground(0);
+	generateGeometries();
 
-	// Enable lighting
+    // Complex geometry assembly
+    ofMesh complexGeometry;
+
+    // Example with different precomputed geometries
+    createPregeom(complexGeometry, 100000, precomputedGeometries[getRandomShapeIndex()]->mesh, 0);
+    createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 1);
+    createPregeom(complexGeometry, 200000, precomputedGeometries[getRandomShapeIndex()]->mesh, 2);
+	createPregeom(complexGeometry, 20000000, precomputedGeometries[getRandomShapeIndex()]->mesh, 3);
+    createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 4);
+    createPregeom(complexGeometry, 2000, precomputedGeometries[getRandomShapeIndex()]->mesh, 5);
+
+    // Store or use complexGeometry for rendering
+    shapeToRender = make_shared<BaseShape>(complexGeometry);
+
+    // Set up lighting and camera
     ofEnableLighting();
     pointLight.enable();
+    ofEnableDepthTest();
 
-	ofEnableDepthTest();
-
-	// Set up the camera
     cam.setNearClip(0.1);
     cam.setFarClip(10000);
-    cam.setPosition(0, 0, 600); // Start camera at a reasonable distance
-    cam.lookAt(ofVec3f(0, 0, 0)); // Look at the origin
-
-    // Set up the light
-    pointLight.setPointLight(); 
-    pointLight.setPosition(ofGetWidth() / 2, ofGetHeight() / 2, 300);
-    pointLight.setDiffuseColor(ofColor(255, 255, 255)); 
-    pointLight.setSpecularColor(ofColor(255, 255, 255)); 
-
-	generateGeometries();
-	for (auto& shape : shapes) {
-        shape->setMaterialColor(ofColor::blue);
-    }
+    cam.setPosition(0, 0, 600);
+    cam.lookAt(ofVec3f(0, 0, 0));
 }
+
+void ofApp::draw() {
+    cam.begin();
+    shapeToRender->draw();
+    cam.end();
+}
+
 
 //--------------------------------------------------------------
 void ofApp::update(){
-}
-
-//--------------------------------------------------------------
-void ofApp::draw(){
-    cam.begin();
-
-	for (auto& shape : shapes) {
-        shape->draw();
-    }
-
-    cam.end();
 }
 
 
