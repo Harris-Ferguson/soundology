@@ -46,6 +46,11 @@ class ofApp : public ofBaseApp{
 		ofLight pointLight;
 		ofEasyCam cam;
 
+		ofPlanePrimitive waterPlane; 
+    	ofTexture waterTexture;  
+		ofShader waterShader;
+		ofFbo reflectionFbo;
+
 	private:
 		float rotationAngle;
 		float rotationSpeed;

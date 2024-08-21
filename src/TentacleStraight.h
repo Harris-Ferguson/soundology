@@ -13,11 +13,11 @@ private:
         // Create a polyline for the tentacle path
         ofPolyline line;
         line.addVertex(ofVec3f(0, 0, 0)); // Start point
-        line.addVertex(ofVec3f(0, -400, 0)); // End point
+        line.addVertex(ofVec3f(0, -200, 0)); // End point
 
         // Tube parameters
         int tubeSegments = 2;
-        float tubeRadius = 3;
+        float tubeRadius = 2;
         int radialSegments = 8;
 
         // Generate the tube geometry along the polyline

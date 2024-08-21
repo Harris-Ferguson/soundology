@@ -247,12 +247,12 @@ void ofApp::generateTestGeometries() {
 
 void ofApp::generateGeometries() {
     // Rocks
-    addGeom(make_shared<BaseShape>(createTetrahedronMesh(10)), ofVec3f(0, 0, 0), ofVec3f(40, 0, 0), ofVec3f(1, 1, 1));
-    addGeom(make_shared<BaseShape>(createTetrahedronMesh(20)), ofVec3f(0, 0, 0), ofVec3f(20, 0, 0), ofVec3f(1, 1, 1));
-    addGeom(make_shared<BaseShape>(createTetrahedronMesh(20)), ofVec3f(0, 0, 0), ofVec3f(0, -40, 0), ofVec3f(1, 1, 1));
-	addGeom(make_shared<BaseShape>(createTetrahedronMesh(30)), ofVec3f(0, 0, 0), ofVec3f(40, 0, 0), ofVec3f(1, 1, 1));
-    addGeom(make_shared<BaseShape>(createTetrahedronMesh(40)), ofVec3f(0, 0, 0), ofVec3f(20, 0, 0), ofVec3f(1, 1, 1));
-    addGeom(make_shared<BaseShape>(createTetrahedronMesh(50)), ofVec3f(0, 0, 0), ofVec3f(0, -40, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(80)), ofVec3f(0, 0, 0), ofVec3f(40, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(80)), ofVec3f(0, 0, 0), ofVec3f(20, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(80)), ofVec3f(0, 0, 0), ofVec3f(0, -40, 0), ofVec3f(1, 1, 1));
+	addGeom(make_shared<BaseShape>(createTetrahedronMesh(80)), ofVec3f(0, 0, 0), ofVec3f(40, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(120)), ofVec3f(0, 0, 0), ofVec3f(20, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<BaseShape>(createTetrahedronMesh(120)), ofVec3f(0, 0, 0), ofVec3f(0, -40, 0), ofVec3f(1, 1, 1));
 
     // Legs
     addGeom(make_shared<Leg>(4, 3), ofVec3f(1, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
@@ -271,13 +271,13 @@ void ofApp::generateGeometries() {
 	addGeom(make_shared<Antenna>(7), ofVec3f( PI/2, -PI/2, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
 
 	// Doughnuts
-	addGeom(make_shared<BaseShape>(createTorusMesh(20, 7, 4, 10)), ofVec3f(0,0,0), ofVec3f(0,20,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createTorusMesh(20, 7, 4, 10)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createTorusMesh(20, 7, 10, 10)), ofVec3f(0,0,0), ofVec3f(20,10,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createTorusMesh(20, 5, 4, 3)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createTorusMesh(20, 5, 4, 5)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createTorusMesh(20, 2, 4, 10)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createTorusMesh(20, 4, 4, 10)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusMesh(70, 7, 4, 10)), ofVec3f(0,0,0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusMesh(70, 7, 4, 10)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusMesh(70, 7, 10, 10)), ofVec3f(0,0,0), ofVec3f(20,10,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusMesh(70, 5, 4, 3)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusMesh(70, 5, 4, 5)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusMesh(70, 2, 4, 10)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createTorusMesh(70, 4, 4, 10)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
 
 	// Mineral Horns
 	addGeom(make_shared<Minerals>(createCylinderMesh(3, 10, 20, 3, 1)), ofVec3f(1,0,0), ofVec3f(0,20,0), ofVec3f(1,1,1));
@@ -292,11 +292,11 @@ void ofApp::generateGeometries() {
 	addGeom(make_shared<Minerals>(createCylinderMesh(3, 3, 300, 3, 1)), ofVec3f(0,0,0), ofVec3f(40,0,0), ofVec3f(1,1,1));
 	
 	// Spikes 
-	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 60, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(0,0,-30), ofVec3f(1.5, 0.7, 1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 60, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(0,0,-30), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 60, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(20,20,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 70, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 80, 4, 10)), ofVec3f(0, -PI/2, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 120, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(0,0,-30), ofVec3f(1.5, 0.7, 1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 120, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(0,0,-30), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 120, 5, 10)), ofVec3f(-PI/2, 0, 0), ofVec3f(20,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 140, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(0, 6, 140, 4, 10)), ofVec3f(0, -PI/2, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
 
 	// Long Lines
 	addGeom(make_shared<TentacleStraight>(), ofVec3f(0,0,0), ofVec3f(0,0,0), ofVec3f(1,1,1));
@@ -310,14 +310,14 @@ void ofApp::generateGeometries() {
 	addGeom(make_shared<BaseShape>(createTorusKnotMesh(15, 3, 3, 13)), ofVec3f(0, 0, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
 
 	// Cinder Blocks
-	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 7, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 7, 40, 4, 10)), ofVec3f(0, 0, PI/2), ofVec3f(0,0,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(3, 10, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 6, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 10, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,-40,30), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(3, 10, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 6, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
-	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 10, 40, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,-40,30), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 7, 80, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 7, 80, 4, 10)), ofVec3f(0, 0, PI/2), ofVec3f(0,0,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(3, 10, 80, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 6, 80, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 10, 80, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,-40,30), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(3, 10, 80, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 6, 80, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,20,0), ofVec3f(1,1,1));
+	addGeom(make_shared<BaseShape>(createCylinderMesh(12, 10, 80, 4, 10)), ofVec3f(0, 0, 0), ofVec3f(0,-40,30), ofVec3f(1,1,1));
 
 	// Pettles
 	addGeom(make_shared<Pettle>(), ofVec3f(0,0,0), ofVec3f(30,0,0), ofVec3f(1,1,1));
@@ -464,13 +464,59 @@ void ofApp::setup() {
 
     rotationAngle = 0.0f;
     rotationSpeed = 0.1f;
+
+    if (!waterShader.load("water.vert", "water.frag")) {
+        ofLogError() << "Shader failed to load!";
+    } else {
+        ofLogNotice() << "Shader loaded successfully!";
+    }
+
+    if (!ofLoadImage(waterTexture, "textures/110.JPG")) {
+        ofLogError() << "Failed to load water texture!";
+    } else {
+        ofLogNotice() << "Water texture loaded successfully!";
+    }
+
+    reflectionFbo.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA, 4);
+    if (!reflectionFbo.isAllocated()) {
+        ofLogError() << "Reflection FBO allocation failed!";
+    } else {
+        ofLogNotice() << "Reflection FBO allocated successfully!";
+    }
+    ofLogNotice() << "FBO status: " << reflectionFbo.checkStatus();
+
+    // Set up the water plane
+    waterPlane.set(2000, 2000, 10, 10);  
+    waterPlane.setPosition(0, -100, 0);  
+    waterPlane.mapTexCoordsFromTexture(waterTexture); 
 }
 
 void ofApp::draw() {
+    // Render the reflection
+    reflectionFbo.begin();
+    ofClear(0, 0, 0, 0);
     cam.begin();
+    cam.lookAt(ofVec3f(0, 0, 0), ofVec3f(0, -1, 0));
     shapeToRender->draw();
     cam.end();
+    reflectionFbo.end();
+
+    // Normal camera rendering
+    cam.begin();
+
+    // Draw the water plane with the shader
+    waterShader.begin();
+    waterShader.setUniformTexture("waterTexture", waterTexture, 0);
+    waterShader.setUniformTexture("reflectionTexture", reflectionFbo.getTexture(), 1);
+    waterPlane.draw();
+    waterShader.end();
+
+    // Draw the main shape
+    shapeToRender->draw();
+
+    cam.end();
 }
+
 
 
 //--------------------------------------------------------------
