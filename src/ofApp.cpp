@@ -463,7 +463,7 @@ void ofApp::setup() {
     cam.lookAt(ofVec3f(0, 0, 0));
 
     rotationAngle = 0.0f;
-    rotationSpeed = 0.1f;
+    rotationSpeed = 0.001f;
 
     if (!waterShader.load("water.vert", "water.frag")) {
         ofLogError() << "Shader failed to load!";
@@ -486,9 +486,10 @@ void ofApp::setup() {
     ofLogNotice() << "FBO status: " << reflectionFbo.checkStatus();
 
     // Set up the water plane
-    waterPlane.set(2000, 2000, 10, 10);  
-    waterPlane.setPosition(0, -100, 0);  
-    waterPlane.mapTexCoordsFromTexture(waterTexture); 
+    waterPlane.set(10000, 10000, 10, 10);  
+    waterPlane.setPosition(0, 500, 0);  
+    waterPlane.rotateDeg(90, 1, 0, 0);
+    waterPlane.mapTexCoords(0, waterTexture.getHeight(), waterTexture.getWidth(), 0); 
 }
 
 void ofApp::draw() {
@@ -501,17 +502,14 @@ void ofApp::draw() {
     cam.end();
     reflectionFbo.end();
 
-    // Normal camera rendering
     cam.begin();
 
-    // Draw the water plane with the shader
-    waterShader.begin();
-    waterShader.setUniformTexture("waterTexture", waterTexture, 0);
-    waterShader.setUniformTexture("reflectionTexture", reflectionFbo.getTexture(), 1);
+    // Draw the water plane first (below the geometry)
+    waterTexture.bind();
     waterPlane.draw();
-    waterShader.end();
+    waterTexture.unbind();
 
-    // Draw the main shape
+    // Draw the geometry above the water plane
     shapeToRender->draw();
 
     cam.end();
@@ -519,12 +517,12 @@ void ofApp::draw() {
 
 
 
+
 //--------------------------------------------------------------
 void ofApp::update(){
     rotationAngle += rotationSpeed;
-
-    // Apply rotation around the Y-axis (you can change to other axes as needed)
-    cam.orbitDeg(rotationAngle, 0, cam.getDistance(), ofVec3f(0, 0, 0));
+    ofVec3f rotation(0, rotationAngle, 0);
+    shapeToRender->applyRotation(rotation);
 }
 
 
