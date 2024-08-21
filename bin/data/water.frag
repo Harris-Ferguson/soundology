@@ -1,5 +1,7 @@
 #version 150
 
+precision highp float; 
+
 uniform sampler2D waterTexture;
 uniform sampler2D reflectionTexture;
 in vec2 vTexCoord;
