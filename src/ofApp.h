@@ -32,6 +32,7 @@ class ofApp : public ofBaseApp{
 		void audioIn(ofSoundBuffer & input);
 
 		void generateGeometries();
+		void generateTestGeometries();
 		void addGeom(shared_ptr<BaseShape> geom, const ofVec3f& rotation, const ofVec3f& translation, const ofVec3f& scale);
 
 		int getRandomShapeIndex();
@@ -45,5 +46,7 @@ class ofApp : public ofBaseApp{
 		ofLight pointLight;
 		ofEasyCam cam;
 
-
+	private:
+		float rotationAngle;
+		float rotationSpeed;
 };

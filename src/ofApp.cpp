@@ -232,6 +232,18 @@ ofMesh createTorusKnotMesh(float radius, float tubeRadius, int radialSegments, i
     return mesh;
 }
 
+void ofApp::generateTestGeometries() {
+    // Legs
+    addGeom(make_shared<Leg>(4, 3), ofVec3f(1, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(4, 6), ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(5, 3), ofVec3f(0, 0, PI / 2), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(6, 4), ofVec3f(0, -(PI / 2), 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(7, 3), ofVec3f(0, PI / 2, PI / 2), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(8, 5), ofVec3f(0, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(9, 2), ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+    addGeom(make_shared<Leg>(10, 6), ofVec3f(0, 0, PI / 2), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1));
+}
+
 
 void ofApp::generateGeometries() {
     // Rocks
@@ -353,23 +365,20 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
     for (int k = 0; k < fileScale * 4; ++k) {
         // Copy the precomputed mesh
         ofMesh submesh = pregeom;
-        ofMesh mirroredSubmesh = pregeom;
 
         ofColor randomColor = colors[static_cast<int>(ofRandom(0, colors.size()))];
 
         for (int i = 0; i < submesh.getNumVertices(); ++i) {
             submesh.addColor(randomColor);
-            mirroredSubmesh.addColor(randomColor);
         }
 
         // Create transformation matrix
         ofMatrix4x4 transformMatrix;
-        ofMatrix4x4 mirroredTransformMatrix;
 
         // Apply scaling
         float scaleValue = fileScale * 4;
         transformMatrix.scale(scaleValue, scaleValue, scaleValue);
-        mirroredTransformMatrix.scale(scaleValue, scaleValue, scaleValue);
+
 
         // Apply rotation
         float randoms[3] = {
@@ -378,13 +387,9 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
             sin((1 + k) * fileScaleOrg * 546.0f + 0.3f) / 2.0f + 0.5f
         };
 
-        transformMatrix.rotate(randoms[0] * 7.0f, 1, 0, 0);
-        transformMatrix.rotate(randoms[1] * 7.0f, 0, 1, 0);
-        transformMatrix.rotate(randoms[2] * 7.0f, 0, 0, 1);
-
-        mirroredTransformMatrix.rotate(-randoms[0] * 7.0f, 1, 0, 0);  // Mirrored rotation
-        mirroredTransformMatrix.rotate(-randoms[1] * 7.0f, 0, 1, 0);
-        mirroredTransformMatrix.rotate(-randoms[2] * 7.0f, 0, 0, 1);
+        transformMatrix.rotate(randoms[0] * 360.0f, 1, 0, 0);
+        transformMatrix.rotate(randoms[1] * 360.0f, 0, 1, 0);
+        transformMatrix.rotate(randoms[2] * 360.0f, 0, 0, 1);
 
         // Apply translation
         float randoms2[3] = {
@@ -399,36 +404,16 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
             (randoms2[2] - 0.5f) * 100.0f * fileScale
         );
 
-        mirroredTransformMatrix.translate(
-            -(randoms2[1] - 0.5f) * 100.0f * fileScale,  // Mirrored translation on x-axis
-            (randoms2[0] - 0.5f) * 100.0f * fileScale,
-            (randoms2[2] - 0.5f) * 100.0f * fileScale
-        );
-
-        // Apply transformations to submesh
-        for (int i = 0; i < submesh.getNumVertices(); ++i) {
-            ofVec3f vertex = submesh.getVertex(i);
-            ofVec3f mirroredVertex = mirroredSubmesh.getVertex(i);
-
-            // Apply translation
-            vertex += ofVec3f(transformMatrix.getTranslation());
-            mirroredVertex += ofVec3f(mirroredTransformMatrix.getTranslation());
-
-            // Apply rotation and scaling
-            ofVec3f rotatedVertex = transformMatrix.getRotate() * vertex;
-            ofVec3f scaledVertex = rotatedVertex * scaleValue;
-
-            ofVec3f mirroredRotatedVertex = mirroredTransformMatrix.getRotate() * mirroredVertex;
-            ofVec3f mirroredScaledVertex = mirroredRotatedVertex * scaleValue;
-
-            // Set the transformed vertex
-            submesh.setVertex(i, scaledVertex);
-            mirroredSubmesh.setVertex(i, mirroredScaledVertex);
+        for (auto& vertex : submesh.getVertices()) {
+            ofVec4f homogenousVertex = ofVec4f(vertex.x, vertex.y, vertex.z, 1.0); 
+            homogenousVertex = transformMatrix.postMult(homogenousVertex); 
+            vertex.x = homogenousVertex.x;
+            vertex.y = homogenousVertex.y;
+            vertex.z = homogenousVertex.z;
         }
 
         // Merge the transformed submesh into the main geometry
         geometry.append(submesh);
-        geometry.append(mirroredSubmesh);
     }
 }
 
@@ -459,11 +444,10 @@ void ofApp::setup() {
     ofMesh complexGeometry;
 
     // Example with different precomputed geometries
-    createPregeom(complexGeometry, 76219, precomputedGeometries[getRandomShapeIndex()]->mesh, 0);
-    createPregeom(complexGeometry, 54934, precomputedGeometries[getRandomShapeIndex()]->mesh, 1);
     createPregeom(complexGeometry, 1054600, precomputedGeometries[getRandomShapeIndex()]->mesh, 2);
 	createPregeom(complexGeometry, 3945123, precomputedGeometries[getRandomShapeIndex()]->mesh, 3);
     createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 4);
+    createPregeom(complexGeometry, 1502, precomputedGeometries[getRandomShapeIndex()]->mesh, 4);
 
     // Store or use complexGeometry for rendering
     shapeToRender = make_shared<BaseShape>(complexGeometry);
@@ -477,6 +461,9 @@ void ofApp::setup() {
     cam.setFarClip(10000);
     cam.setPosition(0, 0, 600);
     cam.lookAt(ofVec3f(0, 0, 0));
+
+    rotationAngle = 0.0f;
+    rotationSpeed = 0.1f;
 }
 
 void ofApp::draw() {
@@ -488,6 +475,10 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    rotationAngle += rotationSpeed;
+
+    // Apply rotation around the Y-axis (you can change to other axes as needed)
+    cam.orbitDeg(rotationAngle, 0, cam.getDistance(), ofVec3f(0, 0, 0));
 }
 
 
