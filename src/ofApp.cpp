@@ -437,6 +437,7 @@ int ofApp::getRandomShapeIndex() {
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+    ofDisableArbTex();
     ofBackground(0);
 	generateGeometries();
 
@@ -465,40 +466,25 @@ void ofApp::setup() {
     rotationAngle = 0.0f;
     rotationSpeed = 0.001f;
 
+    // Load the water texture
+    if(waterImage.load("110.jpg")) {
+		waterImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+        ofLogNotice() << "Water texture loaded successfully!";
+	} else {
+        ofLogError() << "Failed to load water texture!";
+    }
+
     // Set up the water plane
     waterPlane.set(10000, 10000, 10, 10);  
     waterPlane.setPosition(0, 500, 0);  
     waterPlane.rotateDeg(90, 1, 0, 0);
-    waterPlane.mapTexCoords(0, waterTexture.getHeight(), waterTexture.getWidth(), 0); 
-
-    ofFbo::Settings settings;
-    settings.width = ofGetWidth();
-    settings.height = ofGetHeight();
-    settings.internalformat = GL_RGBA8; // Ensure compatibility
-    settings.useDepth = true;
-    settings.useStencil = true; // If you need stencil buffer
-    settings.textureTarget = GL_TEXTURE_2D;
-    settings.numSamples = 4; // For multisampling, set to 0 if you don’t need it
-
-    reflectionFbo.allocate(settings);
-    if (!reflectionFbo.isAllocated()) {
-        ofLogError() << "Reflection FBO allocation failed!";
-    } else {
-        ofLogNotice() << "Reflection FBO allocated successfully!";
-    }
+    waterPlane.mapTexCoords(0, 0, 1, 1);
 
     // Load the water shader
-    if (!waterShader.load("water.vert", "water.frag")) {
+    if (!waterShader.load("shaders/water/water")) {
         ofLogError() << "Shader failed to load!";
     } else {
         ofLogNotice() << "Shader loaded successfully!";
-    }
-
-    // Load the water texture
-    if (!ofLoadImage(waterTexture, "textures/110.JPG")) {
-        ofLogError() << "Failed to load water texture!";
-    } else {
-        ofLogNotice() << "Water texture loaded successfully!";
     }
 
     ofLogNotice() << "OpenGL Vendor: " << glGetString(GL_VENDOR);
@@ -507,29 +493,21 @@ void ofApp::setup() {
 }
 
 void ofApp::draw() {
-    // Render the reflection
-    reflectionFbo.begin();
-    ofClear(0, 0, 0, 0);
     cam.begin();
     cam.lookAt(ofVec3f(0, 0, 0), ofVec3f(0, -1, 0));
+    
     shapeToRender->draw();
-    cam.end();
-    reflectionFbo.end();
 
-    cam.begin();
-
-    // Bind the textures and use the shader
+    waterImage.getTexture().bind();
     waterShader.begin();
-    waterShader.setUniformTexture("waterTexture", waterTexture, 0);
-    waterShader.setUniformTexture("reflectionTexture", reflectionFbo.getTexture(), 1);
-    waterTexture.bind(0);  // Bind to texture unit 0
+    waterShader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
+    waterShader.setUniform1i("waterTexture", 0);
+    
     waterPlane.draw();
-    waterTexture.unbind();
+    
     waterShader.end();
-
-    // Draw the geometry above the water plane
-    shapeToRender->draw();
-
+    waterImage.getTexture().unbind();
+    
     cam.end();
 }
 

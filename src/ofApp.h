@@ -49,7 +49,7 @@ class ofApp : public ofBaseApp{
 		ofPlanePrimitive waterPlane; 
     	ofTexture waterTexture;  
 		ofShader waterShader;
-		ofFbo reflectionFbo;
+		ofImage waterImage;
 
 	private:
 		float rotationAngle;

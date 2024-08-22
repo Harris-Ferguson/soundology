@@ -3,11 +3,18 @@
 
 //========================================================================
 int main( ){
-	ofGLFWWindowSettings settings;
-    settings.setGLVersion(4, 1); //we define the OpenGL version we want to use
-    settings.setSize(1024, 768);
-    ofCreateWindow(settings);
-    // this kicks off the running of my app
-    ofRunApp(new ofApp());
+
+#ifdef OF_TARGET_OPENGLES
+	ofGLESWindowSettings settings;
+	settings.glesVersion=2;
+#else
+	ofGLWindowSettings settings;
+	settings.setGLVersion(3,2);
+#endif
+
+	auto window = ofCreateWindow(settings);
+
+	ofRunApp(window, make_shared<ofApp>());
+	ofRunMainLoop();
 
 }
