@@ -1,6 +1,51 @@
 #include "ofApp.h"
 
-#define AUDIO_SCALING 50
+#define AUDIO_SCALING 160
+
+float textureSwapTimer = 0.0f;
+float textureSwapTimeout = 5.0f; 
+int currentTextureIndex = 0;
+
+vector<string> waterTextures = {
+    "textures/water/001.jpg",
+    "textures/water/025.jpg",
+    "textures/water/051.jpg",
+    "textures/water/053.jpg",
+    "textures/water/060.jpg",
+    "textures/water/081.jpg",
+    "textures/water/110.jpg"
+};
+
+vector<string> skyTextures = {
+    "textures/sky/077.jpg",
+    "textures/sky/078.jpg",
+    "textures/sky/080.jpg"
+    "textures/sky/099.jpg",
+    "textures/sky/102.jpg",
+    "textures/sky/104.jpg"
+    "textures/sky/111.jpg",
+    "textures/sky/115.jpg",
+    "textures/sky/117.jpg"
+};
+
+void ofApp::loadNextTextures() {
+    int randomWaterIndex = static_cast<int>(ofRandom(0, waterTextures.size()));
+    if(waterImage.load(waterTextures[randomWaterIndex])) {
+        waterImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+        ofLogNotice() << "Water texture loaded successfully!";
+    } else {
+        ofLogError() << "Failed to load water texture!";
+    }
+
+    int randomSkyIndex = static_cast<int>(ofRandom(0, skyTextures.size()));
+    if(skyImage.load(skyTextures[randomSkyIndex])) {
+        skyImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+        ofLogNotice() << "Sky texture loaded successfully!";
+    } else {
+        ofLogError() << "Failed to load Sky texture!";
+    }
+}
+
 
 ofMesh createCylinderMesh(float radiusTop, float radiusBottom, float height, int radialSegments, int heightSegments) {
     ofMesh mesh;
@@ -346,14 +391,6 @@ void ofApp::generateGeometries() {
 }
 
 void ofApp::createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type) {
-    std::vector<ofColor> colors = {
-        ofColor::fromHex(0x00AA00), 
-        ofColor::fromHex(0x55FF55), 
-        ofColor::fromHex(0x0000AA),
-        ofColor::fromHex(0x00AAAA),
-        ofColor::fromHex(0xAA00AA)
-    };
-
     float fileScale = size / 300000.0f;
     float fileScaleOrg = fileScale;
 
@@ -370,13 +407,6 @@ void ofApp::createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, i
     for (int k = 0; k < fileScale * 4; ++k) {
         // Copy the precomputed mesh
         ofMesh submesh = pregeom;
-
-        ofColor randomColor = colors[static_cast<int>(ofRandom(0, colors.size()))];
-
-        for (int i = 0; i < submesh.getNumVertices(); ++i) {
-            ofLogNotice() << "adding color";
-            submesh.addColor(randomColor);
-        }
 
         // Create transformation matrix
         ofMatrix4x4 transformMatrix;
@@ -412,7 +442,6 @@ void ofApp::createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, i
             (randoms2[0] - 0.5f) * 100.0f * fileScale,
             (randoms2[2] - 0.5f) * 100.0f * fileScale
         );
-        ofLogNotice() << "matrix mult on vertices";
         for (auto& vertex : submesh.getVertices()) {
             ofVec4f homogenousVertex = ofVec4f(vertex.x, vertex.y, vertex.z, 1.0); 
             homogenousVertex = transformMatrix.postMult(homogenousVertex); 
@@ -440,44 +469,46 @@ void ofApp::updatePregeom(ofMesh& geometry, float size, const ofMesh& pregeom, i
     vector<float> fftValues = fft.getBins(); // Get the current FFT values
     int fftSize = fftValues.size();
 
-    for (int k = 0; k < fileScale * 4; ++k) {
-        // Copy the precomputed mesh
-        ofMesh submesh = pregeom;
+    // Copy the precomputed mesh
+    ofMesh submesh = pregeom;
 
-        // Create transformation matrix
-        ofMatrix4x4 transformMatrix;
+    // Create transformation matrix
+    ofMatrix4x4 transformMatrix;
 
-        // Apply scaling using FFT values
-        int fftIndex = ofMap(k, 0, static_cast<int>(fileScale * 4), 0, fftSize - 1, true);
+    // Iterate over the vertices of the submesh
+    for (int i = 0; i < submesh.getNumVertices(); ++i) {
+        // Map the vertex index to the FFT spectrum
+        int fftIndex = ofMap(i, 0, submesh.getNumVertices(), 0, fftSize - 1, true);
         fftIndex = ofClamp(fftIndex, 0, fftSize - 1);
         float fftValue = fftSize == 0 ? 1 : fftValues[fftIndex] * AUDIO_SCALING;
 
-        float scaleValue = fileScale * 4 * (1.0 + fftValue * 0.1); // FFT influences the scale
-        transformMatrix.scale(scaleValue, scaleValue, scaleValue);
+        float scaleValue = fileScale * (1.0 + fftValue * 0.1);
+        ofMatrix4x4 vertexTransformMatrix;
+        vertexTransformMatrix.scale(scaleValue, scaleValue, scaleValue);
 
         // Apply translation using FFT values
         float randoms2[3] = {
-            sin((2 + k) * fileScaleOrg * 413.0f + 0.1f) / 2.0f + 0.5f + fftValue * 0.1f,
-            sin((2 + k) * fileScaleOrg * 543.0f + 0.2f) / 2.0f + 0.5f + fftValue * 0.1f,
-            sin((2 + k) * fileScaleOrg * 123.0f + 0.3f) / 2.0f + 0.5f + fftValue * 0.1f
+            sin((2 + i) * fileScaleOrg * 413.0f + 0.1f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((2 + i) * fileScaleOrg * 543.0f + 0.2f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((2 + i) * fileScaleOrg * 123.0f + 0.3f) / 2.0f + 0.5f + fftValue * 0.1f
         };
 
-        transformMatrix.translate(
+        vertexTransformMatrix.translate(
             (randoms2[1] - 0.5f) * 100.0f * fileScale,
             (randoms2[0] - 0.5f) * 100.0f * fileScale,
             (randoms2[2] - 0.5f) * 100.0f * fileScale
         );
-        for (auto& vertex : submesh.getVertices()) {
-            ofVec4f homogenousVertex = ofVec4f(vertex.x, vertex.y, vertex.z, 1.0); 
-            homogenousVertex = transformMatrix.postMult(homogenousVertex); 
-            vertex.x = homogenousVertex.x;
-            vertex.y = homogenousVertex.y;
-            vertex.z = homogenousVertex.z;
-        }
 
-        // Merge the transformed submesh into the main geometry
-        geometry.append(submesh);
+        // Apply the transformation to the vertex
+        ofVec4f homogenousVertex = ofVec4f(submesh.getVertices()[i].x, submesh.getVertices()[i].y, submesh.getVertices()[i].z, 1.0);
+        homogenousVertex = vertexTransformMatrix.postMult(homogenousVertex);
+        submesh.getVertices()[i].x = homogenousVertex.x;
+        submesh.getVertices()[i].y = homogenousVertex.y;
+        submesh.getVertices()[i].z = homogenousVertex.z;
     }
+
+    // Merge the transformed submesh into the main geometry
+    geometry.append(submesh);
 }
 
 
@@ -498,13 +529,22 @@ int ofApp::getRandomShapeIndex() {
     }
 }
 
-//--------------------------------------------------------------
-void ofApp::setup() {
-    ofDisableArbTex();
-    ofBackground(0);
-	generateGeometries();
+void applyUniformColor(ofMesh& mesh, const ofColor& color) {
+    mesh.clearColors(); 
+    for (int i = 0; i < mesh.getNumVertices(); ++i) {
+        mesh.addColor(color); 
+    }
+}
 
-    // Complex geometry assembly
+void ofApp::setupGeometry() {
+    std::vector<ofColor> colors = {
+        ofColor::fromHex(0x00AA00), 
+        ofColor::fromHex(0x55FF55), 
+        ofColor::fromHex(0x0000AA),
+        ofColor::fromHex(0x00AAAA),
+        ofColor::fromHex(0xAA00AA)
+    };
+    currentColor = colors[static_cast<int>(ofRandom(0, colors.size()))];
     ofMesh complexGeometry;
 
     createPregeom(complexGeometry, 1054600, precomputedGeometries[getRandomShapeIndex()]->mesh, 2);
@@ -512,41 +552,48 @@ void ofApp::setup() {
     createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 4);
     createPregeom(complexGeometry, 1502, precomputedGeometries[getRandomShapeIndex()]->mesh, 4);
 
-    // Store or use complexGeometry for rendering
+    applyUniformColor(complexGeometry, currentColor);
     shapeToRender = make_shared<BaseShape>(complexGeometry);
+}
 
+//--------------------------------------------------------------
+void ofApp::setup() {
+    ofDisableArbTex();
+    ofBackground(0);
+	generateGeometries();
+    loadNextTextures();
+    setupGeometry();
     // Set up lighting and camera
     ofEnableLighting();
-    pointLight.enable();
+    
+    // Set up a point light
+    pointLight.setDiffuseColor(ofColor(255.0f, 255.0f, 255.0f));
+    pointLight.setSpecularColor(ofColor(255.0f, 255.0f, 255.0f));
+    pointLight.setPosition(300, 300, 1000);  // Position of the point light
+    
+    // Optional: Set up a directional light to simulate sunlight or ambient light
+    ofLight directionalLight;
+    directionalLight.setDiffuseColor(ofColor(255.0f, 255.0f, 255.0f));
+    directionalLight.setSpecularColor(ofColor(255.0f, 255.0f, 255.0f));
+    directionalLight.setDirectional();
+    directionalLight.setOrientation(ofVec3f(45, 45, 0));
+
+    // Set up material properties
+    material.setShininess(128);
+    material.setSpecularColor(ofColor(255, 255, 255, 255));
     ofEnableDepthTest();
 
     cam.setNearClip(0.1);
-    cam.setFarClip(10000);
-    cam.setPosition(300, 300, 1000);
+    cam.setFarClip(150000);
+    cam.setPosition(0, -300, 2000);
     cam.lookAt(ofVec3f(0, 0, 0));
 
-    rotationAngle = 0.0f;
-    rotationSpeed = 0.001f;
-
-    // Load the water texture
-    if(waterImage.load("textures/water/060.jpg")) {
-		waterImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-        ofLogNotice() << "Water texture loaded successfully!";
-	} else {
-        ofLogError() << "Failed to load water texture!";
-    }
-
-    // load the sky texture
-    if(skyImage.load("textures/sky/117.jpg")) {
-		skyImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-        ofLogNotice() << "Sky texture loaded successfully!";
-	} else {
-        ofLogError() << "Failed to load Sky texture!";
-    }
+    objectRotationAngle = 0.0f;
+    objectRotationSpeed = 0.001f;
 
     // Set up the water plane
-    waterPlane.set(10000, 10000, 10, 10);  
-    waterPlane.setPosition(0, 500, 0);  
+    waterPlane.set(14000, 14000, 10, 10);  
+    waterPlane.setPosition(0, 800, 0);  
     waterPlane.rotateDeg(90, 1, 0, 0);
     waterPlane.mapTexCoords(0, 0, 1, 1);
     // set up the sky plane
@@ -588,8 +635,13 @@ void ofApp::draw() {
     cam.begin();
 
     // Apply the same rotation as in the main scene, but in the opposite direction for the reflection
-    shapeToRender->applyRotation(ofVec3f(0, -rotationAngle, 0));  
+    shapeToRender->applyRotation(ofVec3f(0, -objectRotationAngle, 0));  
+    pointLight.enable();
+    material.begin();
     shapeToRender->draw();
+    
+    material.end();
+    pointLight.disable();
 
     cam.end();
     reflectionFbo.end();
@@ -627,8 +679,13 @@ void ofApp::draw() {
     reflectionFbo.getTexture().unbind();
 
     // Now render the shape above the water plane with the original rotation
-    shapeToRender->applyRotation(ofVec3f(0, rotationAngle, 0));  
+    shapeToRender->applyRotation(ofVec3f(0, objectRotationAngle, 0));  
+    pointLight.enable();
+    material.begin();
     shapeToRender->draw();
+    
+    material.end();
+    pointLight.disable();
 
     cam.end();
 
@@ -662,8 +719,8 @@ void ofApp::plot(vector<float>& buffer, float scale) {
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    rotationAngle += rotationSpeed;
-    ofVec3f rotation(0, rotationAngle, 0);
+    objectRotationAngle += objectRotationSpeed;
+    ofVec3f rotation(0, objectRotationAngle, 0);
 
     ofMesh complexGeometry;
 
@@ -672,7 +729,7 @@ void ofApp::update(){
         updatePregeom(complexGeometry, mesh.first, mesh.second, 0);
     }
     submeshMutex.unlock();
-
+    applyUniformColor(complexGeometry, currentColor);
     shapeToRender = make_shared<BaseShape>(complexGeometry);
 
     // Apply rotation
@@ -680,6 +737,15 @@ void ofApp::update(){
 
     // Update the FFT data
     fft.update();
+
+    textureSwapTimer += ofGetLastFrameTime();
+    if(textureSwapTimer >= textureSwapTimeout) {
+        textureSwapTimer = 0.0f;
+        submeshes.clear();
+        generateGeometries();
+        setupGeometry();
+        loadNextTextures();
+    }
 }
 
 

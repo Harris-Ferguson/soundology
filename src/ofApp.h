@@ -37,9 +37,12 @@ class ofApp : public ofBaseApp{
 
 		void generateGeometries();
 		void generateTestGeometries();
+		void setupGeometry();
 		void addGeom(shared_ptr<BaseShape> geom, const ofVec3f& rotation, const ofVec3f& translation, const ofVec3f& scale);
 		void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type);
 		void updatePregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type);
+
+		void loadNextTextures();
 
 		int getRandomShapeIndex();
 
@@ -50,6 +53,8 @@ class ofApp : public ofBaseApp{
 		shared_ptr<BaseShape> shapeToRender;
 		std::vector<std::pair<int, ofMesh>> submeshes;
 		ofMutex submeshMutex;
+		ofColor currentColor;
+		ofTexture shapeTexture;
 
 		ofLight pointLight;
 		ofEasyCam cam;
@@ -59,9 +64,9 @@ class ofApp : public ofBaseApp{
 		ofShader waterShader;
 		ofImage waterImage;
 		ofFbo reflectionFbo;
+		ofMaterial material;
 
 		ofImage skyImage;
-		ofTexture skyTexture;
 		ofPlanePrimitive skyPlane;
 		ofShader skyShader;
 
@@ -71,6 +76,6 @@ class ofApp : public ofBaseApp{
 		vector<float> drawBins, middleBins, audioBins;
 
 	private:
-		float rotationAngle;
-		float rotationSpeed;
+		float objectRotationAngle;
+		float objectRotationSpeed;
 };
