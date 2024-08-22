@@ -345,7 +345,7 @@ void ofApp::generateGeometries() {
 	addGeom(make_shared<BaseShape>(ofMesh::sphere(5, 5)), ofVec3f(0, -PI / 2, 0), ofVec3f(30, 0, 0), ofVec3f(1, 1, 1));
 }
 
-void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type) {
+void ofApp::createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type) {
     std::vector<ofColor> colors = {
         ofColor::fromHex(0x00AA00), 
         ofColor::fromHex(0x55FF55), 
@@ -364,6 +364,9 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
         fileScale = 1.0f;
     }
 
+    vector<float> fftValues = fft.getBins(); // Get the current FFT values
+    int fftSize = fftValues.size();
+
     for (int k = 0; k < fileScale * 4; ++k) {
         // Copy the precomputed mesh
         ofMesh submesh = pregeom;
@@ -371,33 +374,37 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
         ofColor randomColor = colors[static_cast<int>(ofRandom(0, colors.size()))];
 
         for (int i = 0; i < submesh.getNumVertices(); ++i) {
+            ofLogNotice() << "adding color";
             submesh.addColor(randomColor);
         }
 
         // Create transformation matrix
         ofMatrix4x4 transformMatrix;
 
-        // Apply scaling
-        float scaleValue = fileScale * 4;
+        // Apply scaling using FFT values
+        int fftIndex = ofMap(k, 0, static_cast<int>(fileScale * 4), 0, fftSize - 1, true);
+        fftIndex = ofClamp(fftIndex, 0, fftSize - 1);
+        float fftValue = fftSize == 0 ? 1 : fftValues[fftIndex] * AUDIO_SCALING;
+
+        float scaleValue = fileScale * 4 * (1.0 + fftValue * 0.1); // FFT influences the scale
         transformMatrix.scale(scaleValue, scaleValue, scaleValue);
 
-
-        // Apply rotation
+        // Apply rotation using FFT values
         float randoms[3] = {
-            sin((-1 + k * 0.3f) * fileScaleOrg * 687.0f + 0.1f) / 2.0f + 0.5f,
-            sin((2 + k * 0.9f) * fileScaleOrg * 456.0f + 0.2f) / 2.0f + 0.5f,
-            sin((1 + k) * fileScaleOrg * 546.0f + 0.3f) / 2.0f + 0.5f
+            sin((-1 + k * 0.3f) * fileScaleOrg * 687.0f + 0.1f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((2 + k * 0.9f) * fileScaleOrg * 456.0f + 0.2f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((1 + k) * fileScaleOrg * 546.0f + 0.3f) / 2.0f + 0.5f + fftValue * 0.1f
         };
 
         transformMatrix.rotate(randoms[0] * 360.0f, 1, 0, 0);
         transformMatrix.rotate(randoms[1] * 360.0f, 0, 1, 0);
         transformMatrix.rotate(randoms[2] * 360.0f, 0, 0, 1);
 
-        // Apply translation
+        // Apply translation using FFT values
         float randoms2[3] = {
-            sin((2 + k) * fileScaleOrg * 413.0f + 0.1f) / 2.0f + 0.5f,
-            sin((2 + k) * fileScaleOrg * 543.0f + 0.2f) / 2.0f + 0.5f,
-            sin((2 + k) * fileScaleOrg * 123.0f + 0.3f) / 2.0f + 0.5f
+            sin((2 + k) * fileScaleOrg * 413.0f + 0.1f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((2 + k) * fileScaleOrg * 543.0f + 0.2f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((2 + k) * fileScaleOrg * 123.0f + 0.3f) / 2.0f + 0.5f + fftValue * 0.1f
         };
 
         transformMatrix.translate(
@@ -405,7 +412,61 @@ void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type
             (randoms2[0] - 0.5f) * 100.0f * fileScale,
             (randoms2[2] - 0.5f) * 100.0f * fileScale
         );
+        ofLogNotice() << "matrix mult on vertices";
+        for (auto& vertex : submesh.getVertices()) {
+            ofVec4f homogenousVertex = ofVec4f(vertex.x, vertex.y, vertex.z, 1.0); 
+            homogenousVertex = transformMatrix.postMult(homogenousVertex); 
+            vertex.x = homogenousVertex.x;
+            vertex.y = homogenousVertex.y;
+            vertex.z = homogenousVertex.z;
+        }
 
+        submeshes.push_back(std::make_pair(size, submesh));
+        geometry.append(submesh);
+    }
+}
+
+void ofApp::updatePregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type) {
+    float fileScale = size / 300000.0f;
+    float fileScaleOrg = fileScale;
+
+    if (fileScale < 0.4f) {
+        fileScale = 0.4f;
+    }
+    if (fileScale > 1.0f) {
+        fileScale = 1.0f;
+    }
+
+    vector<float> fftValues = fft.getBins(); // Get the current FFT values
+    int fftSize = fftValues.size();
+
+    for (int k = 0; k < fileScale * 4; ++k) {
+        // Copy the precomputed mesh
+        ofMesh submesh = pregeom;
+
+        // Create transformation matrix
+        ofMatrix4x4 transformMatrix;
+
+        // Apply scaling using FFT values
+        int fftIndex = ofMap(k, 0, static_cast<int>(fileScale * 4), 0, fftSize - 1, true);
+        fftIndex = ofClamp(fftIndex, 0, fftSize - 1);
+        float fftValue = fftSize == 0 ? 1 : fftValues[fftIndex] * AUDIO_SCALING;
+
+        float scaleValue = fileScale * 4 * (1.0 + fftValue * 0.1); // FFT influences the scale
+        transformMatrix.scale(scaleValue, scaleValue, scaleValue);
+
+        // Apply translation using FFT values
+        float randoms2[3] = {
+            sin((2 + k) * fileScaleOrg * 413.0f + 0.1f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((2 + k) * fileScaleOrg * 543.0f + 0.2f) / 2.0f + 0.5f + fftValue * 0.1f,
+            sin((2 + k) * fileScaleOrg * 123.0f + 0.3f) / 2.0f + 0.5f + fftValue * 0.1f
+        };
+
+        transformMatrix.translate(
+            (randoms2[1] - 0.5f) * 100.0f * fileScale,
+            (randoms2[0] - 0.5f) * 100.0f * fileScale,
+            (randoms2[2] - 0.5f) * 100.0f * fileScale
+        );
         for (auto& vertex : submesh.getVertices()) {
             ofVec4f homogenousVertex = ofVec4f(vertex.x, vertex.y, vertex.z, 1.0); 
             homogenousVertex = transformMatrix.postMult(homogenousVertex); 
@@ -446,7 +507,6 @@ void ofApp::setup() {
     // Complex geometry assembly
     ofMesh complexGeometry;
 
-    // Example with different precomputed geometries
     createPregeom(complexGeometry, 1054600, precomputedGeometries[getRandomShapeIndex()]->mesh, 2);
 	createPregeom(complexGeometry, 3945123, precomputedGeometries[getRandomShapeIndex()]->mesh, 3);
     createPregeom(complexGeometry, 150000, precomputedGeometries[getRandomShapeIndex()]->mesh, 4);
@@ -514,6 +574,9 @@ void ofApp::setup() {
     ofLogNotice() << "OpenGL Vendor: " << glGetString(GL_VENDOR);
     ofLogNotice() << "OpenGL Renderer: " << glGetString(GL_RENDERER);
     ofLogNotice() << "OpenGL Version: " << glGetString(GL_VERSION);
+
+    // FFT stuff 
+    fft.setup(16384);
 }
 
 void ofApp::draw() {
@@ -568,21 +631,60 @@ void ofApp::draw() {
     shapeToRender->draw();
 
     cam.end();
+
+    #ifdef DEBUG
+        ofPushMatrix();
+        ofTranslate(16, 16);
+        ofSetColor(255);
+        ofDrawBitmapString("Frequency Domain", 0, 0);
+        plot(fft.getBins(), 128);
+        ofPopMatrix();
+        
+        string msg = ofToString((int) ofGetFrameRate()) + " fps";
+        ofDrawBitmapString(msg, ofGetWidth() - 80, ofGetHeight() - 20);
+    #endif DEBUG
 }
 
-
-
+void ofApp::plot(vector<float>& buffer, float scale) {
+	ofNoFill();
+	int n = MIN(1024, buffer.size());
+	ofDrawRectangle(0, 0, n, scale);
+	ofPushMatrix();
+	ofTranslate(0, scale);
+	ofScale(1, -scale);
+	ofBeginShape();
+	for (int i = 0; i < n; i++) {
+		ofVertex(i, buffer[i]);
+	}
+	ofEndShape();
+	ofPopMatrix();
+}
 
 //--------------------------------------------------------------
 void ofApp::update(){
     rotationAngle += rotationSpeed;
     ofVec3f rotation(0, rotationAngle, 0);
+
+    ofMesh complexGeometry;
+
+    submeshMutex.lock();
+    for (auto &mesh : submeshes) {
+        updatePregeom(complexGeometry, mesh.first, mesh.second, 0);
+    }
+    submeshMutex.unlock();
+
+    shapeToRender = make_shared<BaseShape>(complexGeometry);
+
+    // Apply rotation
     shapeToRender->applyRotation(rotation);
+
+    // Update the FFT data
+    fft.update();
 }
 
 
-void ofApp::audioIn(ofSoundBuffer & input){
 
+void ofApp::audioIn(ofSoundBuffer & input){
 	
 }
 

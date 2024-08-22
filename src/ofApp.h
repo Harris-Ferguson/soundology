@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxEasyFft.h"
 #include "Pettle.h"
 #include "Minerals.h"
 #include "Tentacle.h"
@@ -9,6 +10,7 @@
 #include "TentacleStraight.h"
 #include <memory>
 #include <vector>
+#include <utility>
 
 class ofApp : public ofBaseApp{
 	
@@ -30,10 +32,14 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 				
 		void audioIn(ofSoundBuffer & input);
+		void plot(vector<float>& buffer, float scale);
+		void applyFFTToGeometry(ofMesh& mesh, const vector<float>& fftValues);
 
 		void generateGeometries();
 		void generateTestGeometries();
 		void addGeom(shared_ptr<BaseShape> geom, const ofVec3f& rotation, const ofVec3f& translation, const ofVec3f& scale);
+		void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type);
+		void updatePregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type);
 
 		int getRandomShapeIndex();
 
@@ -42,6 +48,8 @@ class ofApp : public ofBaseApp{
 
 		// shape we are currently rendering
 		shared_ptr<BaseShape> shapeToRender;
+		std::vector<std::pair<int, ofMesh>> submeshes;
+		ofMutex submeshMutex;
 
 		ofLight pointLight;
 		ofEasyCam cam;
@@ -56,6 +64,11 @@ class ofApp : public ofBaseApp{
 		ofTexture skyTexture;
 		ofPlanePrimitive skyPlane;
 		ofShader skyShader;
+
+		// FFT stuff
+		int bufferSize;
+		ofxEasyFft fft;
+		vector<float> drawBins, middleBins, audioBins;
 
 	private:
 		float rotationAngle;

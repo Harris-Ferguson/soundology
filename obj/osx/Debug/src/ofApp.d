@@ -387,6 +387,8 @@ obj/osx/Debug/src/ofApp.o: \
   ../../../libs/openFrameworks/3d/of3dUtils.h \
   ../../../libs/openFrameworks/3d/ofCamera.h \
   ../../../libs/openFrameworks/3d/ofEasyCam.h \
+  /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/addons/ofxFft-master/src/ofxEasyFft.h \
+  /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/addons/ofxFft-master/src/ofxFft.h \
   /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Pettle.h \
   /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/BaseShape.h \
   /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Minerals.h \
@@ -1168,6 +1170,10 @@ obj/osx/Debug/src/ofApp.o: \
 ../../../libs/openFrameworks/3d/ofCamera.h:
 
 ../../../libs/openFrameworks/3d/ofEasyCam.h:
+
+/Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/addons/ofxFft-master/src/ofxEasyFft.h:
+
+/Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/addons/ofxFft-master/src/ofxFft.h:
 
 /Users/harrisferguson/nonspace/of/of_v0.12.0_osx_release/apps/myApps/sound/src/Pettle.h:
 
