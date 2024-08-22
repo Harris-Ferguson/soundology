@@ -3,7 +3,11 @@
 #define AUDIO_SCALING 160
 
 float textureSwapTimer = 0.0f;
-float textureSwapTimeout = 5.0f; 
+#ifdef DEBUG
+    float textureSwapTimeout = 5.0f; 
+#else 
+    float textureSwapTimeout = 300.0f; 
+#endif  
 int currentTextureIndex = 0;
 
 vector<string> waterTextures = {
