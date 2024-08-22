@@ -50,6 +50,7 @@ class ofApp : public ofBaseApp{
     	ofTexture waterTexture;  
 		ofShader waterShader;
 		ofImage waterImage;
+		ofFbo reflectionFbo;
 
 	private:
 		float rotationAngle;

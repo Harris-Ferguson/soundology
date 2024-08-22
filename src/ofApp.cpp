@@ -487,29 +487,60 @@ void ofApp::setup() {
         ofLogNotice() << "Shader loaded successfully!";
     }
 
+    // set up the FBO 
+    reflectionFbo.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);
+
     ofLogNotice() << "OpenGL Vendor: " << glGetString(GL_VENDOR);
     ofLogNotice() << "OpenGL Renderer: " << glGetString(GL_RENDERER);
     ofLogNotice() << "OpenGL Version: " << glGetString(GL_VERSION);
 }
 
 void ofApp::draw() {
+    // 1. Render the reflection to the FBO
+    reflectionFbo.begin();
+    ofClear(0, 0, 0, 255);  // Clear the FBO with a black background
+
+    // Flip the scene vertically for the reflection effect
     cam.begin();
-    cam.lookAt(ofVec3f(0, 0, 0), ofVec3f(0, -1, 0));
-    
+
+    // Apply the same rotation as in the main scene, but in the opposite direction for the reflection
+    shapeToRender->applyRotation(ofVec3f(0, -rotationAngle, 0));  
     shapeToRender->draw();
 
-    waterImage.getTexture().bind();
+    cam.end();
+    reflectionFbo.end();
+
+    // 2. Render the main scene
+
+    // Start with the water plane (this will render below the shapes)
+    cam.begin();
+    cam.lookAt(ofVec3f(0, 0, 0), ofVec3f(0, -1, 0));  // Normal camera direction
+
+    // Bind the FBO's texture and pass it to the shader for the water reflection
+    reflectionFbo.getTexture().bind(1);  // Bind FBO texture to texture unit 1
+    waterImage.getTexture().bind(0);     // Bind the water texture to texture unit 0
+
     waterShader.begin();
     waterShader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
     waterShader.setUniform1i("waterTexture", 0);
-    
-    waterPlane.draw();
-    
+    waterShader.setUniform1i("reflectionTexture", 1);  // Pass FBO texture as reflection texture
+
+    waterPlane.draw();  // Draw the water plane
+
     waterShader.end();
+
     waterImage.getTexture().unbind();
-    
+    reflectionFbo.getTexture().unbind();
+
+    // Now render the shape above the water plane with the original rotation
+    shapeToRender->applyRotation(ofVec3f(0, rotationAngle, 0));  
+    shapeToRender->draw();
+
     cam.end();
 }
+
+
+
 
 //--------------------------------------------------------------
 void ofApp::update(){
