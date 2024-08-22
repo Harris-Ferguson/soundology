@@ -52,6 +52,11 @@ class ofApp : public ofBaseApp{
 		ofImage waterImage;
 		ofFbo reflectionFbo;
 
+		ofImage skyImage;
+		ofTexture skyTexture;
+		ofPlanePrimitive skyPlane;
+		ofShader skyShader;
+
 	private:
 		float rotationAngle;
 		float rotationSpeed;

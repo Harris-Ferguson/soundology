@@ -460,18 +460,26 @@ void ofApp::setup() {
 
     cam.setNearClip(0.1);
     cam.setFarClip(10000);
-    cam.setPosition(0, 0, 1200);
+    cam.setPosition(300, 300, 1000);
     cam.lookAt(ofVec3f(0, 0, 0));
 
     rotationAngle = 0.0f;
     rotationSpeed = 0.001f;
 
     // Load the water texture
-    if(waterImage.load("110.jpg")) {
+    if(waterImage.load("textures/water/081.jpg")) {
 		waterImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         ofLogNotice() << "Water texture loaded successfully!";
 	} else {
         ofLogError() << "Failed to load water texture!";
+    }
+
+    // load the sky texture
+    if(skyImage.load("textures/sky/080.jpg")) {
+		skyImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+        ofLogNotice() << "Sky texture loaded successfully!";
+	} else {
+        ofLogError() << "Failed to load Sky texture!";
     }
 
     // Set up the water plane
@@ -479,9 +487,20 @@ void ofApp::setup() {
     waterPlane.setPosition(0, 500, 0);  
     waterPlane.rotateDeg(90, 1, 0, 0);
     waterPlane.mapTexCoords(0, 0, 1, 1);
+    // set up the sky plane
+    skyPlane.set(ofGetWidth(), ofGetHeight(), 10, 10);
+    skyPlane.setPosition(ofGetWidth() / 2, ofGetHeight() / 2, 0);
+    skyPlane.mapTexCoords(0, 0, 1, 1);
 
     // Load the water shader
     if (!waterShader.load("shaders/water/water")) {
+        ofLogError() << "Shader failed to load!";
+    } else {
+        ofLogNotice() << "Shader loaded successfully!";
+    }
+
+    // i know i know
+    if (!skyShader.load("shaders/water/water")) {
         ofLogError() << "Shader failed to load!";
     } else {
         ofLogNotice() << "Shader loaded successfully!";
@@ -511,8 +530,18 @@ void ofApp::draw() {
     reflectionFbo.end();
 
     // 2. Render the main scene
+    ofDisableDepthTest();
+    // sky first
+    skyImage.getTexture().bind();
+    skyShader.begin();
+    skyShader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
+    skyShader.setUniform1i("skyTexture", 0);
+    skyPlane.draw();
+    skyShader.end();
+    skyImage.getTexture().unbind();
+    ofEnableDepthTest();
 
-    // Start with the water plane (this will render below the shapes)
+    // next the water plane (this will render below the shapes)
     cam.begin();
     cam.lookAt(ofVec3f(0, 0, 0), ofVec3f(0, -1, 0));  // Normal camera direction
 
