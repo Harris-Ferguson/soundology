@@ -347,9 +347,11 @@ void ofApp::generateGeometries() {
 
 void createPregeom(ofMesh& geometry, float size, const ofMesh& pregeom, int type) {
     std::vector<ofColor> colors = {
-        ofColor::red, ofColor::green, ofColor::blue, 
-        ofColor::yellow, ofColor::magenta, ofColor::cyan, 
-        ofColor::orange, ofColor::purple, ofColor::pink
+        ofColor::fromHex(0x00AA00), 
+        ofColor::fromHex(0x55FF55), 
+        ofColor::fromHex(0x0000AA),
+        ofColor::fromHex(0x00AAAA),
+        ofColor::fromHex(0xAA00AA)
     };
 
     float fileScale = size / 300000.0f;
@@ -467,7 +469,7 @@ void ofApp::setup() {
     rotationSpeed = 0.001f;
 
     // Load the water texture
-    if(waterImage.load("textures/water/081.jpg")) {
+    if(waterImage.load("textures/water/060.jpg")) {
 		waterImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         ofLogNotice() << "Water texture loaded successfully!";
 	} else {
@@ -475,7 +477,7 @@ void ofApp::setup() {
     }
 
     // load the sky texture
-    if(skyImage.load("textures/sky/080.jpg")) {
+    if(skyImage.load("textures/sky/117.jpg")) {
 		skyImage.getTexture().setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         ofLogNotice() << "Sky texture loaded successfully!";
 	} else {
