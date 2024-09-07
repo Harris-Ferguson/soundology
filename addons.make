@@ -1,2 +1,2 @@
 ofxOpenCv
-ofxFft-master
+ofxFft
