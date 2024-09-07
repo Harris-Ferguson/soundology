@@ -8,7 +8,6 @@ int main( ){
 	ofGLESWindowSettings settings;
 	settings.glesVersion=2;
 #else
-	ofGLWindowSettings settings;
 	settings.setGLVersion(3,2);
 #endif
 
