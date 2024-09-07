@@ -14,6 +14,11 @@ int main( ){
 
 	auto window = ofCreateWindow(settings);
 
+	ofGLFWWindowSettings settings;
+    settings.windowMode = OF_FULLSCREEN;  // Set fullscreen mode
+    settings.setSize(1920, 1080);         // Optionally, set your desired screen resolution
+    ofCreateWindow(settings);
+
 	ofRunApp(window, make_shared<ofApp>());
 	ofRunMainLoop();
 

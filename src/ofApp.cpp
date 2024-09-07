@@ -23,10 +23,10 @@ vector<string> waterTextures = {
 vector<string> skyTextures = {
     "textures/sky/077.jpg",
     "textures/sky/078.jpg",
-    "textures/sky/080.jpg"
+    "textures/sky/080.jpg",
     "textures/sky/099.jpg",
     "textures/sky/102.jpg",
-    "textures/sky/104.jpg"
+    "textures/sky/104.jpg",
     "textures/sky/111.jpg",
     "textures/sky/115.jpg",
     "textures/sky/117.jpg"
@@ -564,6 +564,7 @@ void ofApp::setupGeometry() {
 void ofApp::setup() {
     ofDisableArbTex();
     ofBackground(0);
+    ofSetFullscreen(true);
 	generateGeometries();
     loadNextTextures();
     setupGeometry();
